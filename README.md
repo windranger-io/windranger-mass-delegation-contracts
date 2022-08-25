@@ -19,13 +19,11 @@ Merkle roots smart contract for a negligible gas cost approach is an oracle-base
 - [On-chain](./blob/main/docs/on-chain.md)
 - [Off-chain](./blob/main/docs/off-chain.md)
 
----
 
 ## Development Process
 
 Development follows these processes outlined in [development process](docs/development_process.md)
 
----
 
 ## Install, build and run
 
