@@ -2,6 +2,14 @@
 
 Providing a project with a template for the files, folder structure, dependencies, scripting, configuration (local & remote) and development standards used in a Windranger Soldity project with TypeScript tests.
 
+## Problem/Hypothesis
+
+DAOs and treasury admins experience challenges delegating voting rights to their employees/communities. The current lack of tooling means doing so is a highly manual process that is:
+
+- Time consuming: Both initial delegation and ongoing maintenance (accounting for new/departing DAOm members/delegates)
+- Costly: High gas costs make delegation expensive and impractical in most scenarios
+- Prone to mistakes: highly manual process that typically requires the admin to manually track information through spreadsheets, etc
+
 ---
 
 ## Development Process
