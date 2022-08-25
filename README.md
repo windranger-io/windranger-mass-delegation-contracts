@@ -14,6 +14,11 @@ DAOs and treasury admins experience challenges delegating voting rights to their
 
 Merkle roots smart contract for a negligible gas cost approach is an oracle-based one where delegations are collated into merkle trie nodes and the root is published on chain for every delegation cycle. In order to maintain trust for each update a changelog should be published along with instructions for individuals to be able to generate the merkle trie root from the data.
 
+## Specification
+
+- [On-chain](./blob/main/docs/on-chain.md)
+- [Off-chain](./blob/main/docs/off-chain.md)
+
 ---
 
 ## Development Process
