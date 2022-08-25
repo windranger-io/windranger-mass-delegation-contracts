@@ -1,4 +1,4 @@
-# Mass Delegation
+# Mass Delegation 🎩
 
 Providing a project with a template for the files, folder structure, dependencies, scripting, configuration (local & remote) and development standards used in a Windranger Soldity project with TypeScript tests.
 
