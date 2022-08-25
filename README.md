@@ -10,6 +10,10 @@ DAOs and treasury admins experience challenges delegating voting rights to their
 - Costly: High gas costs make delegation expensive and impractical in most scenarios
 - Prone to mistakes: highly manual process that typically requires the admin to manually track information through spreadsheets, etc
 
+## Solution: Offchain Merkle Delegation Contract
+
+Merkle roots smart contract for a negligible gas cost approach is an oracle-based one where delegations are collated into merkle trie nodes and the root is published on chain for every delegation cycle. In order to maintain trust for each update a changelog should be published along with instructions for individuals to be able to generate the merkle trie root from the data.
+
 ---
 
 ## Development Process
