@@ -1,6 +1,6 @@
 # Use Cases
 
-## Delegator Use Case
+## Delegator Use Case (DEL)
 
 Delegator wants to delegate to a long list of delegatees.
  
@@ -13,7 +13,7 @@ Delegator wants to delegate to a long list of delegatees.
 1. Backend submits Root to chain (Chain).
 1. After previous on-chain transactions success, updates DB (Storage).
 
-## On-chain Voting Use Case
+## On-chain Voting Use Case (ON)
 
 Voter wants to use delegated balance to do on-chain voting via our own transaction.
 
@@ -26,7 +26,7 @@ Voter wants to use delegated balance to do on-chain voting via our own transacti
 1. User clicks to submit the vote, included Context Info, Leaf Hash and Proof.
 1. In the on-chain voting new transaction, the voting power is validated and the vote is casted (same tx).
 
-## Off-chain Snapshot Voting Use Case
+## Off-chain Snapshot Voting Use Case (OFF)
 
 Off-chain Snapshot integration is provided by our API.
 
