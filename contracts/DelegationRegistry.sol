@@ -15,26 +15,28 @@ struct DelegateTrie {
 
 contract DelegationRegistry {
 
-    address oracle; //TODO: use AccessControl
-    address owner;
+    address public oracle; //TODO: use AccessControl
+    address public owner;
     mapping (address => DelegateTrie) public delegation;
     mapping (address => address) public delegateToDelegator;
 
+    event NewOwner();
     event SetDelegates(address indexed delegator, bytes32 indexed trieRoot, DelegationType indexed delegationType);
     event ClearDelegate(address indexed delegator, bytes32 trieRoot, DelegationType delegationType);
-
-    constructor(address _oracle) { 
-        owner = msg.sender;
-        oracle = _oracle;
-    }
 
     modifier onlyOwner() {
         require(owner == msg.sender, "Ownable: caller is not the owner");
         _;
     }
     modifier onlyOracle() {
-        require(oracle == msg.sender, "AccessControl: caller is not the oracle");
+        require(oracle == msg.sender, "Access: caller is not the oracle");
         _;
+    }
+
+    constructor(address _oracle) { 
+        owner = msg.sender;
+        oracle = _oracle;
+        emit NewOwner();
     }
 
     function changeOwner(address newOwner) public virtual onlyOwner {
