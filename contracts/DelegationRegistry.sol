@@ -20,7 +20,8 @@ contract DelegationRegistry {
     mapping (address => DelegateTrie) public delegation;
     mapping (address => address) public delegateToDelegator;
 
-    event NewOwner();
+    event OwnerInitialized(address owner);
+    event OwnerChanged(address newOwner);
     event SetDelegates(address indexed delegator, bytes32 indexed trieRoot, DelegationType indexed delegationType);
     event ClearDelegate(address indexed delegator, bytes32 trieRoot, DelegationType delegationType);
 
@@ -34,17 +35,20 @@ contract DelegationRegistry {
     }
 
     constructor(address _oracle) { 
+        require( _oracle != address(0), "DR: oracle must be non-zero");
         owner = msg.sender;
         oracle = _oracle;
-        emit NewOwner();
+        emit OwnerInitialized(owner);
     }
 
-    function changeOwner(address newOwner) public virtual onlyOwner {
+    function changeOwner(address newOwner) external virtual onlyOwner {
+        require( newOwner != address(0), "DR: newOwner must be non-zero");
         owner = newOwner;
+        emit OwnerChanged(owner);
     }
 
-    function setDelegateTrie(address delegator, bytes32 trieRoot, DelegationType delegationType) public onlyOwner {}
+    function setDelegateTrie(address delegator, bytes32 trieRoot, DelegationType delegationType) external onlyOwner {}
     
-    function clearDelegateTrie(address delegator) public onlyOracle {}
+    function clearDelegateTrie(address delegator) external onlyOracle {}
 
 }
