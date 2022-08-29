@@ -48,14 +48,17 @@ contract MerkleDelegation {
 
     function setDelegateTrie(address delegator, bytes32 trieRoot) external {
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
+        // This memory record will be copied to storage.
         DelegatorRecord memory info;
         info.trieRoot = trieRoot;
         info.blockNumber = block.number;
+        // Record to storage.
         delegation[delegator] = info;
     }
 
     function clearDelegateTrie(address delegator) external {
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
+        // Remove delegator record to save storage gas.
         delete delegation[delegator];
     }
 }
