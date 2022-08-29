@@ -43,7 +43,7 @@ contract DelegationRegistry {
         owner = newOwner;
     }
 
-    function setDelegateTrie(address delegator, bytes32 trieRoot, DelegationType delegationType) public {}
+    function setDelegateTrie(address delegator, bytes32 trieRoot, DelegationType delegationType) public onlyOwner {}
     
     function clearDelegateTrie(address delegator) public onlyOracle {}
 
