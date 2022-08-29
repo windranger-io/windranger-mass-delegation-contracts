@@ -3,6 +3,8 @@ import 'hardhat'
 import '@nomiclabs/hardhat-ethers'
 // End - Support direct Mocha run & debug
 
+import {MerkleTree} from 'merkletreejs'
+
 import chai, {expect} from 'chai'
 import {before} from 'mocha'
 import {solidity} from 'ethereum-waffle'
@@ -32,6 +34,8 @@ describe('MerkleDelegation', () => {
     before(async () => {
         admin = await signer(0)
         oracle = await signer(1)
+        delegator = await signer(2)
+        delegator2 = await signer(3)
     })
 
     // Before each test, deploy a fresh box (clean starting state)
@@ -68,9 +72,46 @@ describe('MerkleDelegation', () => {
         })
     })
 
+    describe('setDelegateTrie', () => {
+        it('delegator is not sender', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            await expect(
+                md
+                    .connect(delegator2)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            ).to.be.revertedWith('DR: delegator must be msg.sender')
+        })
+
+        it('delegator is sender', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+
+            eventOf(md, 'SetDelegates').expectOne(receipt, {
+                delegator: delegator.address,
+                trieRoot
+            })
+
+            expect(await md.owner()).equals(admin.address)
+        })
+
+        // Modifier checks contain the flattened and spaced modifier name
+        it('only owner', async () => {
+            await expect(
+                md.connect(oracle).changeOwner(oracle.address)
+            ).to.be.revertedWith('Ownable: caller is not the owner')
+        })
+    })
+
     /* eslint-disable no-lone-blocks */
 
     let admin: SignerWithAddress
     let oracle: SignerWithAddress
+    let delegator: SignerWithAddress
+    let delegator2: SignerWithAddress
     let md: MerkleDelegation
 })
