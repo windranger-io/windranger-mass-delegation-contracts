@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.4;
 
-struct DelegateRecord {
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+struct DelegatorRecord {
     bytes32 trieRoot;
     uint256 blockNumber;
+}
+
+struct DelegateeRecord {
+    address delegatee;
+    uint256 percentage; // 10,000 is 100%, 1,000 is 1%.
 }
 
 contract MerkleDelegation {
     address public oracle; //TODO: use AccessControl
     address public owner;
-    mapping(address => DelegateRecord) public delegation;
+    mapping(address => DelegatorRecord) public delegation;
     mapping(address => address) public delegateToDelegator;
 
     event OwnerInitialized(address owner);
@@ -41,7 +48,7 @@ contract MerkleDelegation {
 
     function setDelegateTrie(address delegator, bytes32 trieRoot) external {
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
-        DelegateRecord memory info;
+        DelegatorRecord memory info;
         info.trieRoot = trieRoot;
         info.blockNumber = block.number;
         delegation[delegator] = info;
