@@ -54,6 +54,7 @@ contract MerkleDelegation {
         info.blockNumber = block.number;
         // Record to storage.
         delegation[delegator] = info;
+        emit SetDelegates(delegator, trieRoot);
     }
 
     function clearDelegateTrie(address delegator) external {
