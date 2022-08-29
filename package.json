@@ -51,6 +51,7 @@
     "hardhat": "2.10.1",
     "husky": "8.0.1",
     "lint-staged": "13.0.3",
+    "merkletreejs": "^0.2.13",
     "mocha": "10.0.0",
     "node-plantuml": "windranger-io/node-plantuml#fcfc730",
     "prettier": "2.7.1",
