@@ -14,7 +14,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 import {successfulTransaction} from './framework/transaction'
 import {eventOf} from './framework/event-wrapper'
 import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
-import {utils} from 'ethers'
+import {utils, BigNumber, constants} from 'ethers'
 
 // Wires up Waffle with Chai
 chai.use(solidity)
@@ -104,6 +104,51 @@ describe('MerkleDelegation', () => {
             await expect(
                 md.connect(oracle).changeOwner(oracle.address)
             ).to.be.revertedWith('Ownable: caller is not the owner')
+        })
+
+        it('delegator update', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x28')
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+
+            expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
+            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
+                blockNumber
+            )
+        })
+    })
+
+    describe('clearDelegateTrie', () => {
+        it('delegator clearing', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x2a')
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+            expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
+            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
+                blockNumber
+            )
+            const receipt2 = await successfulTransaction(
+                md.connect(delegator).clearDelegateTrie(delegator.address)
+            )
+            expect(await md.getDelegateRoot(delegator.address)).equals(
+                constants.HashZero
+            )
+            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
+                BigNumber.from('0')
+            )
+            /*
+             * await expect(
+             *     md.connect(delegator).getDelegateRoot(oracle.address)
+             * ).to.be.revertedWith('Ownable: caller is not the owner')
+             */
         })
     })
 

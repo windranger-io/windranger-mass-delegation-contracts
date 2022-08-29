@@ -47,6 +47,8 @@ contract MerkleDelegation {
     }
 
     function setDelegateTrie(address delegator, bytes32 trieRoot) external {
+        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(trieRoot != bytes32(0), "DR: trieRoot must be non-zero");
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
         // This memory record will be copied to storage.
         DelegatorRecord memory info;
@@ -61,5 +63,23 @@ contract MerkleDelegation {
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
         // Remove delegator record to save storage gas.
         delete delegation[delegator];
+    }
+
+    function getDelegateRoot(address delegator)
+        public
+        view
+        returns (bytes32 trieRoot)
+    {
+        require(delegator != address(0), "DR: delegator must be non-zero");
+        return delegation[delegator].trieRoot;
+    }
+
+    function getDelegateBlockNumber(address delegator)
+        public
+        view
+        returns (uint256 blockNumber)
+    {
+        require(delegator != address(0), "DR: delegator must be non-zero");
+        return (delegation[delegator].blockNumber);
     }
 }
