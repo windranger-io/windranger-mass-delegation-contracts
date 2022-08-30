@@ -84,6 +84,7 @@ describe('MerkleDelegation', () => {
 
         it('delegator is sender', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x08')
 
             const receipt = await successfulTransaction(
                 md
@@ -93,7 +94,8 @@ describe('MerkleDelegation', () => {
 
             eventOf(md, 'SetDelegates').expectOne(receipt, {
                 delegator: delegator.address,
-                trieRoot
+                trieRoot,
+                blockNumber
             })
 
             expect(await md.owner()).equals(admin.address)

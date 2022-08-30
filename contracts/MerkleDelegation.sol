@@ -11,10 +11,10 @@ struct DelegatorRecord {
 
 struct DelegateeRecord {
     address delegatee;
-    uint256 percentage; // 10,000 is 100%, 1,000 is 1%.
+    uint256 percentage; // 100,000 is 100%, 1,000 is 1%.
 }
 
-contract MerkleDelegation {
+contract MerkleDelegation is Pausable {
     address public oracle; //TODO: use AccessControl
     address public owner;
     mapping(address => DelegatorRecord) public delegation;
@@ -22,7 +22,11 @@ contract MerkleDelegation {
 
     event OwnerInitialized(address owner);
     event OwnerChanged(address newOwner);
-    event SetDelegates(address indexed delegator, bytes32 indexed trieRoot);
+    event SetDelegates(
+        address indexed delegator,
+        bytes32 indexed trieRoot,
+        uint256 blockNumber
+    );
     event ClearDelegate(address indexed delegator, bytes32 trieRoot);
 
     modifier onlyOwner() {
@@ -41,23 +45,31 @@ contract MerkleDelegation {
         emit OwnerInitialized(owner);
     }
 
-    function changeOwner(address newOwner) external virtual onlyOwner {
+    function changeOwner(address newOwner)
+        external
+        virtual
+        onlyOwner
+        whenNotPaused
+    {
         require(newOwner != address(0), "DR: newOwner must be non-zero");
         owner = newOwner;
         emit OwnerChanged(owner);
     }
 
-    function setDelegateTrie(address delegator, bytes32 trieRoot) external {
+    function setDelegateTrie(address delegator, bytes32 trieRoot)
+        external
+        whenNotPaused
+    {
         require(delegator != address(0), "DR: delegator must be non-zero");
         require(trieRoot != bytes32(0), "DR: trieRoot must be non-zero");
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
         // Record to storage.
         delegation[delegator].trieRoot = trieRoot;
         delegation[delegator].blockNumber = block.number;
-        emit SetDelegates(delegator, trieRoot);
+        emit SetDelegates(delegator, trieRoot, block.number);
     }
 
-    function clearDelegateTrie(address delegator) external {
+    function clearDelegateTrie(address delegator) external whenNotPaused {
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
         // Remove delegator record to save storage gas.
         delete delegation[delegator];
@@ -80,4 +92,7 @@ contract MerkleDelegation {
         require(delegator != address(0), "DR: delegator must be non-zero");
         return (delegation[delegator].blockNumber);
     }
+
+    //function pause() whenNotPaused {
+    //}
 }
