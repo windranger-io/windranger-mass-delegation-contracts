@@ -33,33 +33,38 @@ describe('MerkleDelegation', () => {
      */
     before(async () => {
         admin = await signer(0)
-        oracle = await signer(1)
-        delegator = await signer(2)
-        delegator2 = await signer(3)
+        delegator = await signer(1)
+        delegator2 = await signer(2)
+        // gov token should be a contract by an EOA will be the same in this context
+        govToken = await signer(3)
     })
 
     // Before each test, deploy a fresh box (clean starting state)
     beforeEach(async () => {
         md = await deployContract<MerkleDelegation>(
             'MerkleDelegation',
-            oracle.address
+            govToken.address
         )
     })
 
     // Inner describes use the name or idea for the function they're unit testing
-    describe('changeOwner', () => {
+    describe('transferOwnership', () => {
         /*
          * Describe 'it', what unit of logic is being tested
          * Keep in mind the full composition of the name: Contract > function > single test
          */
         it('same owner', async () => {
             const newOwner = admin.address
+            const previousOwner = admin.address
 
             const receipt = await successfulTransaction(
-                md.changeOwner(admin.address)
+                md.transferOwnership(admin.address)
             )
 
-            eventOf(md, 'OwnerChanged').expectOne(receipt, {newOwner})
+            eventOf(md, 'OwnershipTransferred').expectOne(receipt, {
+                previousOwner,
+                newOwner
+            })
 
             expect(await md.owner()).equals(admin.address)
         })
@@ -67,13 +72,13 @@ describe('MerkleDelegation', () => {
         // Modifier checks contain the flattened and spaced modifier name
         it('only owner', async () => {
             await expect(
-                md.connect(oracle).changeOwner(oracle.address)
+                md.connect(delegator).transferOwnership(delegator.address)
             ).to.be.revertedWith('Ownable: caller is not the owner')
         })
     })
 
     describe('setDelegateTrie', () => {
-        it('delegator is not sender', async () => {
+        it('reverts if delegator not sender', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             await expect(
                 md
@@ -82,7 +87,7 @@ describe('MerkleDelegation', () => {
             ).to.be.revertedWith('DR: delegator must be msg.sender')
         })
 
-        it('delegator is sender', async () => {
+        it(' work if delegator is sender', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             const blockNumber = BigNumber.from('0x08')
 
@@ -101,16 +106,9 @@ describe('MerkleDelegation', () => {
             expect(await md.owner()).equals(admin.address)
         })
 
-        // Modifier checks contain the flattened and spaced modifier name
-        it('only owner', async () => {
-            await expect(
-                md.connect(oracle).changeOwner(oracle.address)
-            ).to.be.revertedWith('Ownable: caller is not the owner')
-        })
-
         it('delegator update', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from('0x0c')
+            const blockNumber = BigNumber.from('0x0a')
             const receipt = await successfulTransaction(
                 md
                     .connect(delegator)
@@ -126,7 +124,7 @@ describe('MerkleDelegation', () => {
     describe('clearDelegateTrie', () => {
         it('delegator clearing', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from('0x0e')
+            const blockNumber = BigNumber.from('0x0c')
             const receipt = await successfulTransaction(
                 md
                     .connect(delegator)
@@ -145,11 +143,6 @@ describe('MerkleDelegation', () => {
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 BigNumber.from('0')
             )
-            /*
-             * await expect(
-             *     md.connect(delegator).getDelegateRoot(oracle.address)
-             * ).to.be.revertedWith('Ownable: caller is not the owner')
-             */
         })
     })
 
@@ -161,7 +154,9 @@ describe('MerkleDelegation', () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             const blockNumber = BigNumber.from('0x0e')
             await expect(
-                md.connect(oracle).setDelegateTrie(delegator.address, trieRoot)
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
             ).to.be.revertedWith('Pausable: paused')
         })
         it('can pause clearDelegateTrie', async () => {
@@ -205,7 +200,9 @@ describe('MerkleDelegation', () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             const blockNumber = BigNumber.from('0x0e')
             await expect(
-                md.connect(oracle).setDelegateTrie(delegator.address, trieRoot)
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
             ).to.be.revertedWith('Pausable: paused')
             const receipt1 = await successfulTransaction(
                 md.connect(admin).unpause()
@@ -272,8 +269,8 @@ describe('MerkleDelegation', () => {
     /* eslint-disable no-lone-blocks */
 
     let admin: SignerWithAddress
-    let oracle: SignerWithAddress
     let delegator: SignerWithAddress
     let delegator2: SignerWithAddress
+    let govToken: SignerWithAddress
     let md: MerkleDelegation
 })

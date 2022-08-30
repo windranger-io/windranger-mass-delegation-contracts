@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.4;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
@@ -14,9 +15,11 @@ struct DelegateeRecord {
     uint256 percentage; // 100,000 is 100%, 1,000 is 1%.
 }
 
-contract MerkleDelegation is Pausable {
-    address public oracle; //TODO: use AccessControl
-    address public owner;
+// https://docs.openzeppelin.com/contracts/4.x/api/access#Ownable
+// https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable
+// https://docs.openzeppelin.com/contracts/4.x/api/utils#MerkleProof
+contract MerkleDelegation is Ownable, Pausable {
+    address public governanceToken;
     mapping(address => DelegatorRecord) public delegation;
     mapping(address => address) public delegateToDelegator;
 
@@ -29,31 +32,12 @@ contract MerkleDelegation is Pausable {
     );
     event ClearDelegate(address indexed delegator, bytes32 trieRoot);
 
-    modifier onlyOwner() {
-        require(owner == msg.sender, "Ownable: caller is not the owner");
-        _;
-    }
-    modifier onlyOracle() {
-        require(oracle == msg.sender, "Access: caller is not the oracle");
-        _;
-    }
-
-    constructor(address _oracle) {
-        require(_oracle != address(0), "DR: oracle must be non-zero");
-        owner = msg.sender;
-        oracle = _oracle;
-        emit OwnerInitialized(owner);
-    }
-
-    function changeOwner(address newOwner)
-        external
-        virtual
-        onlyOwner
-        whenNotPaused
-    {
-        require(newOwner != address(0), "DR: newOwner must be non-zero");
-        owner = newOwner;
-        emit OwnerChanged(owner);
+    constructor(address _governanceToken) Ownable() Pausable() {
+        require(
+            _governanceToken != address(0),
+            "DR: token addr must be non-zero"
+        );
+        governanceToken = _governanceToken;
     }
 
     function setDelegateTrie(address delegator, bytes32 trieRoot)
@@ -91,6 +75,16 @@ contract MerkleDelegation is Pausable {
     {
         require(delegator != address(0), "DR: delegator must be non-zero");
         return (delegation[delegator].blockNumber);
+    }
+
+    function transferOwnership(address newOwner)
+        public
+        virtual
+        override
+        onlyOwner
+        whenNotPaused
+    {
+        _transferOwnership(newOwner);
     }
 
     function pause() public onlyOwner whenNotPaused {
