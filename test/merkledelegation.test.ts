@@ -180,6 +180,22 @@ describe('MerkleDelegation', () => {
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             ).to.be.revertedWith('Pausable: paused')
         })
+        it('can pause pause function', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            await expect(md.connect(admin).pause()).to.be.revertedWith(
+                'Pausable: paused'
+            )
+        })
+        it('cannot pause unpause function', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            const receipt1 = await successfulTransaction(
+                md.connect(admin).unpause()
+            )
+        })
     })
 
     /* eslint-disable no-lone-blocks */
