@@ -116,7 +116,6 @@ describe('MerkleDelegation', () => {
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
             )
-
             expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
@@ -194,6 +193,78 @@ describe('MerkleDelegation', () => {
             )
             const receipt1 = await successfulTransaction(
                 md.connect(admin).unpause()
+            )
+        })
+    })
+
+    describe('unpause', () => {
+        it('can unpause setDelegateTrie', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x0e')
+            await expect(
+                md.connect(oracle).setDelegateTrie(delegator.address, trieRoot)
+            ).to.be.revertedWith('Pausable: paused')
+            const receipt1 = await successfulTransaction(
+                md.connect(admin).unpause()
+            )
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+        })
+        it('can pause clearDelegateTrie', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x0e')
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            await expect(
+                md.connect(delegator).clearDelegateTrie(delegator.address)
+            ).to.be.revertedWith('Pausable: paused')
+            const receipt1 = await successfulTransaction(
+                md.connect(admin).unpause()
+            )
+            const receipt3 = await successfulTransaction(
+                md.connect(delegator).clearDelegateTrie(delegator.address)
+            )
+        })
+        it('can unpause pause function', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            await expect(md.connect(admin).pause()).to.be.revertedWith(
+                'Pausable: paused'
+            )
+            const receipt1 = await successfulTransaction(
+                md.connect(admin).unpause()
+            )
+            const receipt3 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+        })
+        it('cannot unpause if not paused', async () => {
+            await expect(md.connect(admin).unpause()).to.be.revertedWith(
+                'Pausable: not paused'
+            )
+        })
+        it('cannot unpause unpause function', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            const receipt1 = await successfulTransaction(
+                md.connect(admin).unpause()
+            )
+            await expect(md.connect(admin).unpause()).to.be.revertedWith(
+                'Pausable: not paused'
             )
         })
     })
