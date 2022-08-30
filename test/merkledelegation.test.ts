@@ -108,7 +108,7 @@ describe('MerkleDelegation', () => {
 
         it('delegator update', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from('0x28')
+            const blockNumber = BigNumber.from('0x0c')
             const receipt = await successfulTransaction(
                 md
                     .connect(delegator)
@@ -125,7 +125,7 @@ describe('MerkleDelegation', () => {
     describe('clearDelegateTrie', () => {
         it('delegator clearing', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from('0x2a')
+            const blockNumber = BigNumber.from('0x0e')
             const receipt = await successfulTransaction(
                 md
                     .connect(delegator)
