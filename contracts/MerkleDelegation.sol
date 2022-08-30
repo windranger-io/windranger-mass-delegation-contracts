@@ -93,6 +93,11 @@ contract MerkleDelegation is Pausable {
         return (delegation[delegator].blockNumber);
     }
 
-    //function pause() whenNotPaused {
-    //}
+    function pause() public onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() public onlyOwner whenPaused {
+        _unpause();
+    }
 }

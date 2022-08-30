@@ -154,6 +154,34 @@ describe('MerkleDelegation', () => {
         })
     })
 
+    describe('pause', () => {
+        it('can pause setDelegateTrie', async () => {
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x0e')
+            await expect(
+                md.connect(oracle).setDelegateTrie(delegator.address, trieRoot)
+            ).to.be.revertedWith('Pausable: paused')
+        })
+        it('can pause clearDelegateTrie', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+            const blockNumber = BigNumber.from('0x0e')
+            const receipt = await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+            const receipt0 = await successfulTransaction(
+                md.connect(admin).pause()
+            )
+            await expect(
+                md.connect(delegator).clearDelegateTrie(delegator.address)
+            ).to.be.revertedWith('Pausable: paused')
+        })
+    })
+
     /* eslint-disable no-lone-blocks */
 
     let admin: SignerWithAddress
