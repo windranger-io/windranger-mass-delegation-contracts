@@ -40,6 +40,9 @@ contract MerkleDelegation is Ownable, Pausable {
         governanceToken = _governanceToken;
     }
 
+    //TODO: also the owner/admin can update the governance token address that is hashed with all leafs.
+    // function updateGovernanceToken(address newGovernanceToken) { governanceToken = newGovernancetoken; }
+
     function setDelegateTrie(address delegator, bytes32 trieRoot)
         external
         whenNotPaused
@@ -54,6 +57,7 @@ contract MerkleDelegation is Ownable, Pausable {
     }
 
     function clearDelegateTrie(address delegator) external whenNotPaused {
+        require(delegator != address(0), "DR: delegator must be non-zero");
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
         // Remove delegator record to save storage gas.
         delete delegation[delegator];
