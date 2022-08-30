@@ -63,6 +63,14 @@ contract MerkleDelegation is Ownable, Pausable {
         delete delegation[delegator];
     }
 
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
+    }
+
     function getDelegateRoot(address delegator)
         external
         view
@@ -89,13 +97,5 @@ contract MerkleDelegation is Ownable, Pausable {
         whenNotPaused
     {
         _transferOwnership(newOwner);
-    }
-
-    function pause() public onlyOwner whenNotPaused {
-        _pause();
-    }
-
-    function unpause() public onlyOwner whenPaused {
-        _unpause();
     }
 }
