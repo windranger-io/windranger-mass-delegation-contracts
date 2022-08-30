@@ -197,6 +197,7 @@ describe('MerkleDelegation', () => {
                     .setDelegateTrie(delegator.address, trieRoot)
             ).to.be.revertedWith('Pausable: paused')
         })
+
         it('can pause clearDelegateTrie', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
@@ -210,6 +211,7 @@ describe('MerkleDelegation', () => {
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             ).to.be.revertedWith('Pausable: paused')
         })
+
         it('can pause pause function', async () => {
             await successfulTransaction(md.connect(admin).pause())
             await expect(md.connect(admin).pause()).to.be.revertedWith(
@@ -243,6 +245,7 @@ describe('MerkleDelegation', () => {
                     .setDelegateTrie(delegator.address, trieRoot)
             )
         })
+
         it('can pause clearDelegateTrie', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
@@ -264,6 +267,7 @@ describe('MerkleDelegation', () => {
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             )
         })
+
         it('can unpause pause function', async () => {
             const receipt0 = await successfulTransaction(
                 md.connect(admin).pause()
@@ -278,11 +282,13 @@ describe('MerkleDelegation', () => {
                 md.connect(admin).pause()
             )
         })
+
         it('cannot unpause if not paused', async () => {
             await expect(md.connect(admin).unpause()).to.be.revertedWith(
                 'Pausable: not paused'
             )
         })
+
         it('cannot unpause unpause function', async () => {
             const receipt0 = await successfulTransaction(
                 md.connect(admin).pause()
