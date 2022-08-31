@@ -1,2 +1,8 @@
 # Solidity Architecture
-Write about the various contract, their relationships and even use pictures.
+
+Contracts:
+
+* MerkleDelegation: register Merkle roots for each delegator.
+* MerkleDelegationFactory: deploys a MerkleDelegation for each DAO/Governance Token.
+
+TODO: Diagram
