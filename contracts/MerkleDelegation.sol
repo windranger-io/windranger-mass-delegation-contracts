@@ -19,6 +19,8 @@ struct DelegateeRecord {
 // https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable
 // https://docs.openzeppelin.com/contracts/4.x/api/utils#MerkleProof
 contract MerkleDelegation is Ownable, Pausable {
+    using MerkleProof for bytes32[];
+
     address public governanceToken;
     mapping(address => DelegatorRecord) public delegation;
     mapping(address => address) public delegateToDelegator;
@@ -97,5 +99,29 @@ contract MerkleDelegation is Ownable, Pausable {
         whenNotPaused
     {
         _transferOwnership(newOwner);
+    }
+
+    function verifyVotingPower(
+        address delegator,
+        address voter,
+        uint256 weight,
+        uint256 blockNumber,
+        bytes32[] memory proof
+    ) public view returns (bool) {
+        // require() past blockNumber
+        require(blockNumber < block.number, "MD: only past can be verified");
+
+        // between last merkle root and now we use the last merkle root.
+
+        // search for the appropriate merkle root (the next root with smaller block number).
+        // ie. if we have root for block numbers [10,55,123] then for block 60 we have to use the hash of block 55
+        // and for number 131 we use hash of block 123, and for block 9 (or 10) where is hash (with smaller #block)
+        // then it can be verified that delegated stake was zero, for this voter.
+
+        return
+            proof.verify(
+                delegation[delegator].trieRoot,
+                keccak256(abi.encodePacked(voter, weight, governanceToken))
+            );
     }
 }
