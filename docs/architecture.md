@@ -5,4 +5,4 @@ Contracts:
 * MerkleDelegation: register Merkle roots for each delegator.
 * MerkleDelegationFactory: deploys a MerkleDelegation for each DAO/Governance Token.
 
-TODO: Diagram
+![alt text](Mass_Delegation_Architecture_drawio.png "Mass Delegation Architecture")
