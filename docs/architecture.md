@@ -1,4 +1,4 @@
-# Solidity Architecture
+# Mass Delegation Architecture
 
 Contracts:
 
