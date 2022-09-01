@@ -2,38 +2,39 @@
 
 ## Delegator Use Case (DEL)
 
-Delegator wants to delegate to a long list of delegatees.
+**Delegator** wants to delegate to a long list of delegatees.
  
-1. Navigates to mass-delegation website.
-1. Provides list of addresss and percentages.
-1. Presses Submit button.
-1. Submits POST to our API.
-1. Backend updates Off-chain Global Weight Trie (Mem).
-1. Backend computed the new Merkle Root (Mem).
-1. Backend submits Root to chain (Chain).
+1. Navigates to *mass-delegation website*.
+1. Provides list of *addresses* and *percentages*.
+1. Presses Submit *button*.
+1. Submits POST to our *API*.
+1. *Backend* updates Off-chain Global Weight Trie (Mem).
+1. *Backend* computed the new Merkle Root (Mem).
+1. *Front-end* get the Root.
+1. *Front-end* Delegator register the Root on-chain.
 1. After previous on-chain transactions success, updates DB (Storage).
 
 ## On-chain Voting Use Case (ON)
 
-Voter wants to use delegated balance to do on-chain voting via our own transaction.
+**Delegatee/Voter** wants to use delegated balance to do on-chain voting via our own transaction.
 
-1. Navigates to Voting Website (New!).
+1. Navigates to *Voting Website* (New or Existing UI).
 1. Connect wallet to website.
-1. Send GET request to our API to compute current voting power.
-1. Navigates to proposal to be voted for.
-1. Send GET to API to computer voting power prior to proposal creation block.
-1. GET request for Merkle Leaf Context and Merkle Proof.
-1. User clicks to submit the vote, included Context Info, Leaf Hash and Proof.
-1. In the on-chain voting new transaction, the voting power is validated and the vote is casted (same tx).
+1. Send GET request to our *API* to compute current voting power.
+1. Navigates to *proposal* to be voted for.
+1. Send GET to API to *compute voting power* prior to proposal creation block.
+1. GET request for *Merkle Leaf Content* and *Merkle Proof*.
+1. User clicks to *submit the vote*, included Context Info, Leaf Hash and Proof.
+1. In the on-chain voting new transaction, the *voting power is validated* and the vote is casted (same tx).
 
 ## Off-chain Snapshot Voting Use Case (OFF)
 
-Off-chain Snapshot integration is provided by our API.
+Off-chain Snapshot integration is provided by our API. The **Voter/Delegatee** should be able to vote using Snapshot and our new Snapshot Strategy.
 
-1. Snapshot will use our own Voting Strategy (that can be the default).
-1. API has to give the exact to payload type.
-1. Payload is a mapping of addresses to voting weight (example payload below).
-1. Payload is specific to a point in time (ie. "snapshot" block number).
+1. Snapshot will use our own *Voting Strategy* (that can be the default).
+1. *API* has to give the exact to payload type.
+1. *Payload* is a mapping of *addresses to voting weight* (example payload below).
+1. Payload is specific to a point in time (ie. "snapshot" *block number*).
 
 ```json
 [
