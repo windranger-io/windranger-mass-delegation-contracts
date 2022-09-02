@@ -22,8 +22,7 @@ contract MerkleDelegation is Ownable, Pausable {
     using MerkleProof for bytes32[];
 
     address public governanceToken;
-    mapping(address => DelegatorRecord) public delegation;
-    mapping(address => address) public delegateToDelegator;
+    mapping(address => DelegatorRecord[]) public delegation;
 
     event OwnerInitialized(address owner);
     event OwnerChanged(address newOwner);
@@ -52,9 +51,11 @@ contract MerkleDelegation is Ownable, Pausable {
         require(delegator != address(0), "DR: delegator must be non-zero");
         require(trieRoot != bytes32(0), "DR: trieRoot must be non-zero");
         require(msg.sender == delegator, "DR: delegator must be msg.sender");
+        DelegatorRecord memory newRecord;
+        newRecord.trieRoot = trieRoot;
+        newRecord.blockNumber = block.number;
         // Record to storage.
-        delegation[delegator].trieRoot = trieRoot;
-        delegation[delegator].blockNumber = block.number;
+        delegation[delegator].push(newRecord);
         emit SetDelegates(delegator, trieRoot, block.number);
     }
 
@@ -79,7 +80,26 @@ contract MerkleDelegation is Ownable, Pausable {
         returns (bytes32 trieRoot)
     {
         require(delegator != address(0), "DR: delegator must be non-zero");
-        return delegation[delegator].trieRoot;
+        require(
+            delegation[delegator].length > 0,
+            "MD: delegator has not delegated"
+        );
+        return delegation[delegator][delegation[delegator].length - 1].trieRoot;
+    }
+
+    function getDelegateRoot(address delegator, uint256 blockNumber)
+        external
+        view
+        returns (bytes32 trieRoot)
+    {
+        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(
+            delegation[delegator].length > 0,
+            "MD: delegator has not delegated"
+        );
+        require(blockNumber < block.number, "MD: only past can be verified");
+        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
+        return delegation[delegator][checkpoint].trieRoot;
     }
 
     function getDelegateBlockNumber(address delegator)
@@ -88,7 +108,27 @@ contract MerkleDelegation is Ownable, Pausable {
         returns (uint256 blockNumber)
     {
         require(delegator != address(0), "DR: delegator must be non-zero");
-        return (delegation[delegator].blockNumber);
+        require(
+            delegation[delegator].length > 0,
+            "MD: delegator has not delegated"
+        );
+        return
+            delegation[delegator][delegation[delegator].length - 1].blockNumber;
+    }
+
+    function getDelegateBlockNumber(address delegator, uint256 blockNumber)
+        external
+        view
+        returns (uint256 blockNum)
+    {
+        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(
+            delegation[delegator].length > 0,
+            "MD: delegator has not delegated"
+        );
+        require(blockNumber < block.number, "MD: only past can be verified");
+        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
+        return delegation[delegator][checkpoint].blockNumber;
     }
 
     function transferOwnership(address newOwner)
@@ -108,9 +148,6 @@ contract MerkleDelegation is Ownable, Pausable {
         uint256 blockNumber,
         bytes32[] memory proof
     ) public view returns (bool) {
-        // require() past blockNumber
-        require(blockNumber < block.number, "MD: only past can be verified");
-
         // between last merkle root and now we use the last merkle root.
 
         // search for the appropriate merkle root (the next root with smaller block number).
@@ -118,10 +155,26 @@ contract MerkleDelegation is Ownable, Pausable {
         // and for number 131 we use hash of block 123, and for block 9 (or 10) where is hash (with smaller #block)
         // then it can be verified that delegated stake was zero, for this voter.
 
+        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
         return
             proof.verify(
-                delegation[delegator].trieRoot,
+                delegation[delegator][checkpoint].trieRoot,
                 keccak256(abi.encodePacked(voter, weight, governanceToken))
             );
+    }
+
+    function _getPrevCheckpoint(address delegator, uint256 _blockNum)
+        internal
+        view
+        returns (uint256 blockNum)
+    {
+        //TODO: do Binary Search instead of Linear Search.
+        for (uint256 i = delegation[delegator].length - 1; i >= 0; i--) {
+            if (delegation[delegator][i].blockNumber < _blockNum) {
+                // Found prev checkpoint
+                return delegation[delegator][i].blockNumber;
+            }
+        }
+        require(false, "MD: no suitable delegation found");
     }
 }
