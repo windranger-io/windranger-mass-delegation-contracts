@@ -59,13 +59,6 @@ contract MerkleDelegation is Ownable, Pausable {
         emit SetDelegates(delegator, trieRoot, block.number);
     }
 
-    function clearDelegateTrie(address delegator) external whenNotPaused {
-        require(delegator != address(0), "DR: delegator must be non-zero");
-        require(msg.sender == delegator, "DR: delegator must be msg.sender");
-        // Remove delegator record to save storage gas.
-        delete delegation[delegator];
-    }
-
     function pause() external onlyOwner whenNotPaused {
         _pause();
     }
@@ -74,7 +67,7 @@ contract MerkleDelegation is Ownable, Pausable {
         _unpause();
     }
 
-    function getDelegateRoot(address delegator)
+    function getLastDelegateRoot(address delegator)
         external
         view
         returns (bytes32 trieRoot)
@@ -102,7 +95,7 @@ contract MerkleDelegation is Ownable, Pausable {
         return delegation[delegator][checkpoint].trieRoot;
     }
 
-    function getDelegateBlockNumber(address delegator)
+    function getLastDelegateBlockNumber(address delegator)
         external
         view
         returns (uint256 blockNumber)
