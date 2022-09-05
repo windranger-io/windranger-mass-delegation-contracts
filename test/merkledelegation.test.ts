@@ -15,9 +15,10 @@ import {successfulTransaction} from './framework/transaction'
 import {eventOf} from './framework/event-wrapper'
 // import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
 import {utils, BigNumber, constants} from 'ethers'
+import {soliditySha3} from 'web3-utils'
 
 /* eslint-disable no-duplicate-imports */
-import {waffle, web3} from 'hardhat'
+import {ethers, waffle, web3} from 'hardhat'
 
 // Wires up Waffle with Chai
 chai.use(solidity)
@@ -29,10 +30,6 @@ const provider = waffle.provider
 
 export function advanceBlock() {
     return provider.send('evm_mine', [])
-}
-
-function soliditySha3(strParam: string) {
-    return web3.utils.soliditySha3(strParam)
 }
 
 /*
@@ -66,11 +63,10 @@ describe('MerkleDelegation', () => {
             'MerkleDelegation',
             govToken.address
         )
-        // const weight = BigNumber.from(10000)
-        const hash0 = soliditySha3(voter0.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter0.address, weight, govToken.address])
-        const hash1 = soliditySha3(voter1.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter1.address, weight, govToken.address])
-        const hash2 = soliditySha3(voter2.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter2.address, weight, govToken.address])
-        const hash3 = soliditySha3(voter3.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter3.address, weight, govToken.address])
+        hash0 = soliditySha3(voter0.address, 10000, govToken.address)!
+        const hash1 = soliditySha3(voter1.address, 10000, govToken.address)
+        const hash2 = soliditySha3(voter2.address, 10000, govToken.address)
+        const hash3 = soliditySha3(voter3.address, 10000, govToken.address)
         const leaves = [hash0, hash1, hash2, hash3]
         const merkleTree = new MerkleTree(leaves, soliditySha3, {
             sortPairs: true
@@ -300,8 +296,6 @@ describe('MerkleDelegation', () => {
             const blockNum = BigNumber.from(await provider.getBlockNumber())
             await advanceBlock()
             await advanceBlock()
-            await advanceBlock()
-            await advanceBlock()
 
             expect(await md.getLastDelegateRoot(delegator.address)).equals(root)
             expect(
@@ -310,6 +304,10 @@ describe('MerkleDelegation', () => {
             expect(
                 await md.getPrevCheckpoint(delegator.address, blockNum)
             ).equals(0)
+
+            expect(
+                await md.testHash(voter0.address, BigNumber.from(10000))
+            ).equals(hash0)
 
             expect(
                 await md
@@ -339,4 +337,5 @@ describe('MerkleDelegation', () => {
     let md: MerkleDelegation
     let proof: string[]
     let root: string
+    let hash0: string
 })

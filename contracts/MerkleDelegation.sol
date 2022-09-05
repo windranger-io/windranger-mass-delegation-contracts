@@ -98,9 +98,17 @@ contract MerkleDelegation is Ownable, Pausable {
         return
             proof.verify(
                 delegation[delegator][checkpoint].trieRoot,
-                //keccak256(abi.encodePacked(voter, weight, governanceToken))
-                keccak256(abi.encodePacked(voter))
+                keccak256(abi.encodePacked(voter, weight, governanceToken))
+                //keccak256(abi.encodePacked(voter))
             );
+    }
+
+    function testHash(address voter, uint256 weight)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(voter, weight, governanceToken));
     }
 
     function getDelegateRoot(address delegator, uint256 blockNumber)
