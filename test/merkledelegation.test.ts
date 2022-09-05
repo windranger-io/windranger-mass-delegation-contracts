@@ -13,18 +13,26 @@ import {deployContract, signer} from './framework/contracts'
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 import {successfulTransaction} from './framework/transaction'
 import {eventOf} from './framework/event-wrapper'
-import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
+// import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
 import {utils, BigNumber, constants} from 'ethers'
 
 /* eslint-disable no-duplicate-imports */
-import {waffle} from 'hardhat'
+import {waffle, web3} from 'hardhat'
 
 // Wires up Waffle with Chai
 chai.use(solidity)
 const provider = waffle.provider
+/*
+ * const HashZero = constants.HashZero
+ * const soliditySha3 = web3.utils.soliditySha3
+ */
 
 export function advanceBlock() {
     return provider.send('evm_mine', [])
+}
+
+function soliditySha3(strParam: string) {
+    return web3.utils.soliditySha3(strParam)
 }
 
 /*
@@ -45,6 +53,11 @@ describe('MerkleDelegation', () => {
         delegator2 = await signer(2)
         // gov token should be a contract by an EOA will be the same in this context
         govToken = await signer(3)
+        voter = await signer(4)
+        voter0 = await signer(5)
+        voter1 = await signer(6)
+        voter2 = await signer(7)
+        voter3 = await signer(8)
     })
 
     // Before each test, deploy a fresh box (clean starting state)
@@ -53,6 +66,18 @@ describe('MerkleDelegation', () => {
             'MerkleDelegation',
             govToken.address
         )
+        // const weight = BigNumber.from(10000)
+        const hash0 = soliditySha3(voter0.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter0.address, weight, govToken.address])
+        const hash1 = soliditySha3(voter1.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter1.address, weight, govToken.address])
+        const hash2 = soliditySha3(voter2.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter2.address, weight, govToken.address])
+        const hash3 = soliditySha3(voter3.address) // utils.soliditySha256(['string', 'uint256', 'string'], [voter3.address, weight, govToken.address])
+        const leaves = [hash0, hash1, hash2, hash3]
+        const merkleTree = new MerkleTree(leaves, soliditySha3, {
+            sortPairs: true
+        })
+        root = merkleTree.getHexRoot()
+        const leaf = hash0! // soliditySha3(voter0.address)!
+        proof = merkleTree.getHexProof(leaf)
     })
 
     // Inner describes use the name or idea for the function they're unit testing
@@ -151,11 +176,9 @@ describe('MerkleDelegation', () => {
 
     describe('pause', () => {
         it('can pause setDelegateTrie', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+            // const blockNumber = BigNumber.from(await provider.getBlockNumber())
             await expect(
                 md
                     .connect(delegator)
@@ -177,20 +200,16 @@ describe('MerkleDelegation', () => {
 
     describe('unpause', () => {
         it('can unpause setDelegateTrie', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+            // const blockNumber = BigNumber.from(await provider.getBlockNumber())
             await expect(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
             ).to.be.revertedWith('Pausable: paused')
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
-            const receipt = await successfulTransaction(
+            await successfulTransaction(md.connect(admin).unpause())
+            await successfulTransaction(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
@@ -198,18 +217,12 @@ describe('MerkleDelegation', () => {
         })
 
         it('can unpause pause function', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             await expect(md.connect(admin).pause()).to.be.revertedWith(
                 'Pausable: paused'
             )
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
-            const receipt3 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).unpause())
+            await successfulTransaction(md.connect(admin).pause())
         })
 
         it('cannot unpause if not paused', async () => {
@@ -219,15 +232,96 @@ describe('MerkleDelegation', () => {
         })
 
         it('cannot unpause unpause function', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
+            await successfulTransaction(md.connect(admin).unpause())
             await expect(md.connect(admin).unpause()).to.be.revertedWith(
                 'Pausable: not paused'
             )
+        })
+    })
+
+    describe('verifyVotingPower', () => {
+        it('reverts if ', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+
+            await successfulTransaction(
+                md.connect(delegator).setDelegateTrie(delegator.address, root)
+            )
+            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+
+            const hashZero = [constants.HashZero]
+            await expect(
+                await md
+                    .connect(delegator)
+                    .verifyVotingPower(
+                        delegator.address,
+                        voter.address,
+                        BigNumber.from(10000),
+                        blockNumber.add(BigNumber.from(1)),
+                        hashZero
+                    )
+            ).to.be.revertedWith('MD: only past can be verified')
+        })
+        it('reverts if is the current block number', async () => {
+            const trieRoot = utils.soliditySha256(['string'], ['some input'])
+
+            await successfulTransaction(
+                md
+                    .connect(delegator)
+                    .setDelegateTrie(delegator.address, trieRoot)
+            )
+            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+
+            // console.log(tree.proof)
+            await expect(
+                await md
+                    .connect(delegator)
+                    .verifyVotingPower(
+                        delegator.address,
+                        voter.address,
+                        BigNumber.from(10000),
+                        blockNumber,
+                        proof
+                    )
+            ).to.be.revertedWith('MD: only past can be verified')
+        })
+        it('verifies a good proof from past block', async () => {
+            await successfulTransaction(
+                md.connect(delegator).setDelegateTrie(delegator.address, root)
+            )
+            /*
+             * const blockNumber0 = BigNumber.from(await provider.getBlockNumber())
+             *  we advance 1 the block.number so we are verifying a past block.
+             */
+            await advanceBlock()
+            await advanceBlock()
+            await advanceBlock()
+            await advanceBlock()
+            const blockNum = BigNumber.from(await provider.getBlockNumber())
+            await advanceBlock()
+            await advanceBlock()
+            await advanceBlock()
+            await advanceBlock()
+
+            expect(await md.getLastDelegateRoot(delegator.address)).equals(root)
+            expect(
+                await md.getLastDelegateBlockNumber(delegator.address)
+            ).equals(45)
+            expect(
+                await md.getPrevCheckpoint(delegator.address, blockNum)
+            ).equals(0)
+
+            expect(
+                await md
+                    .connect(delegator)
+                    .verifyVotingPower(
+                        delegator.address,
+                        voter0.address,
+                        BigNumber.from(10000),
+                        blockNum,
+                        proof
+                    )
+            ).equals(true)
         })
     })
 
@@ -237,5 +331,12 @@ describe('MerkleDelegation', () => {
     let delegator: SignerWithAddress
     let delegator2: SignerWithAddress
     let govToken: SignerWithAddress
+    let voter: SignerWithAddress
+    let voter0: SignerWithAddress
+    let voter1: SignerWithAddress
+    let voter2: SignerWithAddress
+    let voter3: SignerWithAddress
     let md: MerkleDelegation
+    let proof: string[]
+    let root: string
 })

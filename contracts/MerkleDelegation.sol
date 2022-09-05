@@ -80,6 +80,29 @@ contract MerkleDelegation is Ownable, Pausable {
         return delegation[delegator][delegation[delegator].length - 1].trieRoot;
     }
 
+    function verifyVotingPower(
+        address delegator,
+        address voter,
+        uint256 weight,
+        uint256 blockNumber,
+        bytes32[] calldata proof
+    ) public view returns (bool) {
+        // between last merkle root and now we use the last merkle root.
+
+        // search for the appropriate merkle root (the next root with smaller block number).
+        // ie. if we have root for block numbers [10,55,123] then for block 60 we have to use the hash of block 55
+        // and for number 131 we use hash of block 123, and for block 9 (or 10) where is hash (with smaller #block)
+        // then it can be verified that delegated stake was zero, for this voter.
+
+        uint256 checkpoint = getPrevCheckpoint(delegator, blockNumber);
+        return
+            proof.verify(
+                delegation[delegator][checkpoint].trieRoot,
+                //keccak256(abi.encodePacked(voter, weight, governanceToken))
+                keccak256(abi.encodePacked(voter))
+            );
+    }
+
     function getDelegateRoot(address delegator, uint256 blockNumber)
         external
         view
@@ -90,8 +113,7 @@ contract MerkleDelegation is Ownable, Pausable {
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
         );
-        require(blockNumber < block.number, "MD: only past can be verified");
-        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
+        uint256 checkpoint = getPrevCheckpoint(delegator, blockNumber);
         return delegation[delegator][checkpoint].trieRoot;
     }
 
@@ -120,7 +142,7 @@ contract MerkleDelegation is Ownable, Pausable {
             "MD: delegator has not delegated"
         );
         require(blockNumber < block.number, "MD: only past can be verified");
-        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
+        uint256 checkpoint = getPrevCheckpoint(delegator, blockNumber);
         return delegation[delegator][checkpoint].blockNumber;
     }
 
@@ -134,38 +156,17 @@ contract MerkleDelegation is Ownable, Pausable {
         _transferOwnership(newOwner);
     }
 
-    function verifyVotingPower(
-        address delegator,
-        address voter,
-        uint256 weight,
-        uint256 blockNumber,
-        bytes32[] memory proof
-    ) public view returns (bool) {
-        // between last merkle root and now we use the last merkle root.
-
-        // search for the appropriate merkle root (the next root with smaller block number).
-        // ie. if we have root for block numbers [10,55,123] then for block 60 we have to use the hash of block 55
-        // and for number 131 we use hash of block 123, and for block 9 (or 10) where is hash (with smaller #block)
-        // then it can be verified that delegated stake was zero, for this voter.
-
-        uint256 checkpoint = _getPrevCheckpoint(delegator, blockNumber);
-        return
-            proof.verify(
-                delegation[delegator][checkpoint].trieRoot,
-                keccak256(abi.encodePacked(voter, weight, governanceToken))
-            );
-    }
-
-    function _getPrevCheckpoint(address delegator, uint256 _blockNum)
-        internal
+    function getPrevCheckpoint(address delegator, uint256 _blockNum)
+        public
         view
-        returns (uint256 blockNum)
+        returns (uint256 index)
     {
+        require(_blockNum < block.number, "MD: only past can be verified");
         //TODO: do Binary Search instead of Linear Search.
         for (uint256 i = delegation[delegator].length - 1; i >= 0; i--) {
             if (delegation[delegator][i].blockNumber < _blockNum) {
                 // Found prev checkpoint
-                return delegation[delegator][i].blockNumber;
+                return i;
             }
         }
         require(false, "MD: no suitable delegation found");
