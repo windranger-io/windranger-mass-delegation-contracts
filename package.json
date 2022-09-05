@@ -64,6 +64,7 @@
     "web3": "^1.7.5"
   },
   "dependencies": {
-    "bunyan": "^1.8.15"
+    "bunyan": "^1.8.15",
+    "web3-utils": "^1.7.5"
   }
 }
