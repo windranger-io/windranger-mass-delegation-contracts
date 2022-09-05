@@ -241,7 +241,7 @@ describe('MerkleDelegation', () => {
     })
 
     describe('verifyVotingPower', () => {
-        it('reverts if ', async () => {
+        it('reverts if is a future block number', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
 
             await successfulTransaction(
@@ -251,7 +251,7 @@ describe('MerkleDelegation', () => {
 
             const hashZero = [constants.HashZero]
             await expect(
-                await md
+                md
                     .connect(delegator)
                     .verifyVotingPower(
                         delegator.address,
@@ -274,7 +274,7 @@ describe('MerkleDelegation', () => {
 
             // console.log(tree.proof)
             await expect(
-                await md
+                md
                     .connect(delegator)
                     .verifyVotingPower(
                         delegator.address,
