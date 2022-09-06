@@ -36,7 +36,7 @@ contract MerkleDelegation is Ownable, Pausable {
     constructor(address _governanceToken) Ownable() Pausable() {
         require(
             _governanceToken != address(0),
-            "DR: token addr must be non-zero"
+            "MD: token addr must be non-zero"
         );
         governanceToken = _governanceToken;
     }
@@ -48,9 +48,9 @@ contract MerkleDelegation is Ownable, Pausable {
         external
         whenNotPaused
     {
-        require(delegator != address(0), "DR: delegator must be non-zero");
-        require(trieRoot != bytes32(0), "DR: trieRoot must be non-zero");
-        require(msg.sender == delegator, "DR: delegator must be msg.sender");
+        require(delegator != address(0), "MD: delegator must be non-zero");
+        require(trieRoot != bytes32(0), "MD: trieRoot must be non-zero");
+        require(msg.sender == delegator, "MD: delegator must be msg.sender");
         DelegatorRecord memory newRecord;
         newRecord.trieRoot = trieRoot;
         newRecord.blockNumber = block.number;
@@ -72,7 +72,7 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (bytes32 trieRoot)
     {
-        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -115,7 +115,7 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (bytes32 trieRoot)
     {
-        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -129,7 +129,7 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (uint256 blockNumber)
     {
-        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -143,7 +143,7 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (uint256 blockNum)
     {
-        require(delegator != address(0), "DR: delegator must be non-zero");
+        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"

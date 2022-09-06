@@ -113,7 +113,7 @@ describe('MerkleDelegation', () => {
                 md
                     .connect(delegator2)
                     .setDelegateTrie(constants.AddressZero, trieRoot)
-            ).to.be.revertedWith('DR: delegator must be non-zero')
+            ).to.be.revertedWith('MD: delegator must be non-zero')
         })
 
         it('reverts if trie root has all zero bytes', async () => {
@@ -122,7 +122,7 @@ describe('MerkleDelegation', () => {
                 md
                     .connect(delegator2)
                     .setDelegateTrie(delegator2.address, trieRoot)
-            ).to.be.revertedWith('DR: trieRoot must be non-zero')
+            ).to.be.revertedWith('MD: trieRoot must be non-zero')
         })
 
         it('reverts if delegator not sender', async () => {
@@ -131,7 +131,7 @@ describe('MerkleDelegation', () => {
                 md
                     .connect(delegator2)
                     .setDelegateTrie(delegator.address, trieRoot)
-            ).to.be.revertedWith('DR: delegator must be msg.sender')
+            ).to.be.revertedWith('MD: delegator must be msg.sender')
         })
 
         it('works if delegator is sender', async () => {
