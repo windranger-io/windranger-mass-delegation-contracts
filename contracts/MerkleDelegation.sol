@@ -80,7 +80,7 @@ contract MerkleDelegation is Ownable, Pausable {
         return delegation[delegator][delegation[delegator].length - 1].trieRoot;
     }
 
-    function verifyVotingPower(
+    function verifyDelegatedWeight(
         address delegator,
         address voter,
         uint256 weight,
@@ -99,7 +99,6 @@ contract MerkleDelegation is Ownable, Pausable {
             proof.verify(
                 delegation[delegator][checkpoint].trieRoot,
                 keccak256(abi.encodePacked(voter, weight, governanceToken))
-                //keccak256(abi.encodePacked(voter))
             );
     }
 

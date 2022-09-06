@@ -249,7 +249,7 @@ describe('MerkleDelegation', () => {
             await expect(
                 md
                     .connect(delegator)
-                    .verifyVotingPower(
+                    .verifyDelegatedWeight(
                         delegator.address,
                         voter.address,
                         BigNumber.from(10000),
@@ -272,7 +272,7 @@ describe('MerkleDelegation', () => {
             await expect(
                 md
                     .connect(delegator)
-                    .verifyVotingPower(
+                    .verifyDelegatedWeight(
                         delegator.address,
                         voter.address,
                         BigNumber.from(10000),
@@ -312,7 +312,7 @@ describe('MerkleDelegation', () => {
             expect(
                 await md
                     .connect(delegator)
-                    .verifyVotingPower(
+                    .verifyDelegatedWeight(
                         delegator.address,
                         voter0.address,
                         BigNumber.from(10000),
