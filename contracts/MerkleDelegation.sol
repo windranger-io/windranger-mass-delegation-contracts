@@ -10,11 +10,6 @@ struct DelegatorRecord {
     uint256 blockNumber;
 }
 
-struct DelegateeRecord {
-    address delegatee;
-    uint256 percentage; // 100,000 is 100%, 1,000 is 1%.
-}
-
 // https://docs.openzeppelin.com/contracts/4.x/api/access#Ownable
 // https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable
 // https://docs.openzeppelin.com/contracts/4.x/api/utils#MerkleProof
@@ -48,7 +43,7 @@ contract MerkleDelegation is Ownable, Pausable {
         require(delegator != address(0), "MD: delegator must be non-zero");
         require(trieRoot != bytes32(0), "MD: trieRoot must be non-zero");
         require(msg.sender == delegator, "MD: delegator must be msg.sender");
-        DelegatorRecord memory newRecord;
+        DelegatorRecord memory newRecord = DelegatorRecord(bytes32(0), 0);
         newRecord.trieRoot = trieRoot;
         newRecord.blockNumber = block.number;
         // Record to storage.
@@ -83,7 +78,7 @@ contract MerkleDelegation is Ownable, Pausable {
         uint256 weight,
         uint256 blockNumber,
         bytes32[] calldata proof
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         // between last merkle root and now we use the last merkle root.
 
         // search for the appropriate merkle root (the next root with smaller block number).
@@ -143,7 +138,7 @@ contract MerkleDelegation is Ownable, Pausable {
     }
 
     function testHash(address voter, uint256 weight)
-        public
+        external
         view
         returns (bytes32)
     {
@@ -160,14 +155,14 @@ contract MerkleDelegation is Ownable, Pausable {
         _transferOwnership(newOwner);
     }
 
-    function getPrevCheckpoint(address delegator, uint256 _blockNum)
+    function getPrevCheckpoint(address delegator, uint256 blockNum)
         public
         view
         returns (uint256 index)
     {
-        require(_blockNum < block.number, "MD: only past can be verified");
+        require(blockNum < block.number, "MD: only past can be verified");
         for (uint256 i = delegation[delegator].length; i > 0; i--) {
-            if (delegation[delegator][i - 1].blockNumber < _blockNum) {
+            if (delegation[delegator][i - 1].blockNumber < blockNum) {
                 // Found prev checkpoint
                 return i - 1;
             }
