@@ -13,7 +13,6 @@ import {deployContract, signer} from './framework/contracts'
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 import {successfulTransaction} from './framework/transaction'
 import {eventOf} from './framework/event-wrapper'
-// import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
 import {utils, BigNumber, constants} from 'ethers'
 import {soliditySha3} from 'web3-utils'
 
@@ -198,7 +197,6 @@ describe('MerkleDelegation', () => {
         it('can unpause setDelegateTrie', async () => {
             await successfulTransaction(md.connect(admin).pause())
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            // const blockNumber = BigNumber.from(await provider.getBlockNumber())
             await expect(
                 md
                     .connect(delegator)
@@ -268,7 +266,6 @@ describe('MerkleDelegation', () => {
             )
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
 
-            // console.log(tree.proof)
             await expect(
                 md
                     .connect(delegator)
