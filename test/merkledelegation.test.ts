@@ -17,15 +17,11 @@ import {utils, BigNumber, constants} from 'ethers'
 import {soliditySha3} from 'web3-utils'
 
 /* eslint-disable no-duplicate-imports */
-import {ethers, waffle, web3} from 'hardhat'
+import {waffle} from 'hardhat'
 
 // Wires up Waffle with Chai
 chai.use(solidity)
 const provider = waffle.provider
-/*
- * const HashZero = constants.HashZero
- * const soliditySha3 = web3.utils.soliditySha3
- */
 
 export function advanceBlock() {
     return provider.send('evm_mine', [])
