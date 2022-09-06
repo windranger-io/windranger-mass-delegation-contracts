@@ -230,7 +230,7 @@ describe('MerkleDelegation', () => {
         })
     })
 
-    describe('verifyVotingPower', () => {
+    describe('verifyDelegatedWeight', () => {
         it('reverts if is a future block number', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
 
