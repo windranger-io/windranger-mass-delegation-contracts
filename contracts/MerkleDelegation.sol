@@ -41,9 +41,6 @@ contract MerkleDelegation is Ownable, Pausable {
         governanceToken = _governanceToken;
     }
 
-    //TODO: also the owner/admin can update the governance token address that is hashed with all leafs.
-    // function updateGovernanceToken(address newGovernanceToken) { governanceToken = newGovernancetoken; }
-
     function setDelegateTrie(address delegator, bytes32 trieRoot)
         external
         whenNotPaused
@@ -169,7 +166,6 @@ contract MerkleDelegation is Ownable, Pausable {
         returns (uint256 index)
     {
         require(_blockNum < block.number, "MD: only past can be verified");
-        //TODO: do Binary Search instead of Linear Search.
         for (uint256 i = delegation[delegator].length - 1; i >= 0; i--) {
             if (delegation[delegator][i].blockNumber < _blockNum) {
                 // Found prev checkpoint
