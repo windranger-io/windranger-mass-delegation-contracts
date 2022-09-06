@@ -55,7 +55,7 @@ ON delegators(
 ```sql=
 Token (
 CHAR(20) token_address, (UNIQUE, PRIMARY KEY)
-CHAR(20) deployed_instance
+CHAR(20) deployed_instance 
 )
 ```
 
