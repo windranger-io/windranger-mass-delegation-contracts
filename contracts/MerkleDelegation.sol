@@ -99,14 +99,6 @@ contract MerkleDelegation is Ownable, Pausable {
             );
     }
 
-    function testHash(address voter, uint256 weight)
-        public
-        view
-        returns (bytes32)
-    {
-        return keccak256(abi.encodePacked(voter, weight, governanceToken));
-    }
-
     function getDelegateRoot(address delegator, uint256 blockNumber)
         external
         view
@@ -150,6 +142,14 @@ contract MerkleDelegation is Ownable, Pausable {
         return delegation[delegator][checkpoint].blockNumber;
     }
 
+    function testHash(address voter, uint256 weight)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(voter, weight, governanceToken));
+    }
+
     function transferOwnership(address newOwner)
         public
         virtual
@@ -166,10 +166,10 @@ contract MerkleDelegation is Ownable, Pausable {
         returns (uint256 index)
     {
         require(_blockNum < block.number, "MD: only past can be verified");
-        for (uint256 i = delegation[delegator].length - 1; i >= 0; i--) {
-            if (delegation[delegator][i].blockNumber < _blockNum) {
+        for (uint256 i = delegation[delegator].length; i > 0; i--) {
+            if (delegation[delegator][i - 1].blockNumber < _blockNum) {
                 // Found prev checkpoint
-                return i;
+                return i - 1;
             }
         }
         require(false, "MD: no suitable delegation found");
