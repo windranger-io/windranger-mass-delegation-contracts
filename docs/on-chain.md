@@ -1,114 +1,101 @@
 # On Chain
 
 
-## Registry Smart Contract
+## MerkleDelegation Smart Contract
 
 ### Objects
 
-#### Delegation Types
+#### DelegatorRecord Types
+
 ``` solidity
-enum DelegationType {
-    WEIGHTED,
-    FIXED, (can be removed)
-    PROPORTIONAL,
+struct DelegatorRecord {
+    bytes32 treeRoot,
+    uint256 blockNumber,
 }
 ```
 
-the `DelegationType` enum will be used to represent the type of delegation a particular trie represents.
+The `DelegatorRecord` will be used to represent the information neeed for one checkpoint of the delegator.
 
 #### Delegate Trie
+
+The Merkle tree we utilize have rectors in the leaf to check the following information: 
+
 ``` solidity
-struct DelegateTrie {
-    bytes32 trieRoot
-    DelegationType delegationType
-    uint256 blockNumber
-    
+struct LeafRecord {
+    address delegatee,
+    uint256 weight,
+    address governanceToken
 }
 ```
 
-### Mappings
-
-The `DelegationTrie` struct will be used to store delegation trie roots as well as their associated delegation type.
-
 #### Delegation Mapping
-``` solidity
-mapping (address => DelegateTrie) public delegation;
-```
-
-The `delegation` mapping will be used to store references from the delegator address to their `DelegateTrie`'s
-
-The first key will be the delegator address and the value will be a `DelegateTrie` object.
-
-#### delegateToDelegator
 
 ``` solidity
-mapping (address => address) public delegateToDelegator
+mapping(address => DelegatorRecord[]) public delegation;
 ```
 
-The `delegateToDelegator` mapping will be used to store a reference mapping delegate addresses to their Delegator
-
-
-The first key will be the address of the `Delegate` and the value the associated `DelegateTrie` object
-
-Note that with the graph indexing this contract, this is not nessessary, we would be able to build out the inverse relation through events emitted.
+The `delegation` mapping will be used to store the checkpoint history for each delegator. The checkpoint allow anyone to verify what is the last checkpoint before an specific block number (snapshot).
 
 ### Functions and Events
 
 #### setDelegateTrie
 
 ```solidity
-function setDelegateTrie(address delegator, bytes32 trieRoot, DelegationType delegationType) public
+function setDelegateTrie(address delegator, bytes32 treeRoot) external
 ```
-
 
 ##### Requirements:
-- `trieRoot` cannot be the zero address 
-- can only be called by an address with the `oracle` role
+- `treeRoot` cannot be the zero address 
+- can only be called by the delegator address
 
-it emits the `SetDelegate` event
+it emits the `SetDelegates` event
 ``` solidity
-event SetDelegates(address indexed delegator, bytes32 indexed trieRoot, DelegationType indexed delegationType) public onlyOracle;
+event SetDelegates(
+        address indexed delegator,
+        bytes32 indexed trieRoot,
+        uint256 blockNumber
+    );
 ```
 
-#### clearDelegateTrie
-```solidity
-function clearDelegateTrie(address delegator) public onlyOracle;
-```
-
-sets the `DelegateTrie` at `delegateToDelegateTrie[delegator]` to a null object.
-
-It emits the `ClearDelegate` event.
-``` solidity
-event ClearDelegate(address indexed delegator, bytes32 trieRoot, DelegationType delegationType);
-```
+To clear the delegatee list the delegator can call `setDelegateTrie()` with a single leaf (100% self-delegation).
 
 ##### Requirements:
 - `delegator` cannot be the zero address 
-- can only be called by an address with the `oracle` role
 
-
-#### proveAndComputeVotingPower
+#### verifyDelegatedWeight
 
 
 ```solidity
-function proveAndComputeVotingPower(DelegationType delegationType, uint index, uint amountOrWeight, bytes32[] proof, address delegator) public returns (uint)
+    function verifyDelegatedWeight(
+        address delegator,
+        address voter,
+        uint256 weight,
+        uint256 blockNumber,
+        bytes32[] calldata proof
+    ) external view returns (bool)
 ```
 
 Computes and returns the voting power `msg.sender` has.
 
 ##### Requirements:
 - `delegator` cannot be the zero address 
+- `voter` cannot be the zero address
+- `weight` is integer representing the proportional delegated power
+- `blockNumber` is the block number that we are verifying (time context)
+- `proof` is a list of hashes that prove that the tree the last checkpoint before
+    blockNumber has a tree that validates the data.
 
-returns a `uint` representing the `msg.sender`'s voting power, returns `0` if the proof is invalid
-
+returns a `bool` representing the verification of the data.
 
 
 ### Access Control
 
-#### Oracle
+#### Admin
 
-#### Super Admin
+Owner of the contract.
 
 #### Upgrader
+
+To be defined, if we need an Upgrader or not.
 
 
