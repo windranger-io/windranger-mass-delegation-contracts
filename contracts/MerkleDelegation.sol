@@ -42,7 +42,7 @@ contract MerkleDelegation is Ownable, Pausable {
     {
         require(delegator != address(0), "MD: delegator must be non-zero");
         require(trieRoot != bytes32(0), "MD: trieRoot must be non-zero");
-        require(msg.sender == delegator, "MD: delegator must be msg.sender");
+        require(_msgSender() == delegator, "MD: delegator must be msg.sender");
         DelegatorRecord memory newRecord = DelegatorRecord(bytes32(0), 0);
         newRecord.trieRoot = trieRoot;
         newRecord.blockNumber = block.number;
