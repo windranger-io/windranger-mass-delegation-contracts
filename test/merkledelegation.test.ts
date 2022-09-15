@@ -67,7 +67,7 @@ describe('MerkleDelegation', () => {
             sortPairs: true
         })
         root = merkleTree.getHexRoot()
-        const leaf = hash0! // soliditySha3(voter0.address)!
+        const leaf = hash0
         proof = merkleTree.getHexProof(leaf)
     })
 
