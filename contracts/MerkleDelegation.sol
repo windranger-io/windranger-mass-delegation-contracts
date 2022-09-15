@@ -28,10 +28,6 @@ contract MerkleDelegation is Ownable, Pausable {
     event ClearDelegate(address indexed delegator, bytes32 trieRoot);
 
     constructor(address _governanceToken) Ownable() Pausable() {
-        require(
-            _governanceToken != address(0),
-            "MD: token addr must be non-zero"
-        );
         governanceToken = _governanceToken;
         emit OwnerInitialized(_msgSender());
     }
@@ -40,7 +36,6 @@ contract MerkleDelegation is Ownable, Pausable {
         external
         whenNotPaused
     {
-        require(delegator != address(0), "MD: delegator must be non-zero");
         require(trieRoot != bytes32(0), "MD: trieRoot must be non-zero");
         require(_msgSender() == delegator, "MD: delegator must be msg.sender");
         DelegatorRecord memory newRecord = DelegatorRecord(bytes32(0), 0);
@@ -64,7 +59,6 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (bytes32 trieRoot)
     {
-        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -99,7 +93,6 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (bytes32 trieRoot)
     {
-        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -113,7 +106,6 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (uint256 blockNumber)
     {
-        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"
@@ -127,7 +119,6 @@ contract MerkleDelegation is Ownable, Pausable {
         view
         returns (uint256 blockNum)
     {
-        require(delegator != address(0), "MD: delegator must be non-zero");
         require(
             delegation[delegator].length > 0,
             "MD: delegator has not delegated"

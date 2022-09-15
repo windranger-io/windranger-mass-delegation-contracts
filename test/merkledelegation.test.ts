@@ -102,15 +102,6 @@ describe('MerkleDelegation', () => {
     })
 
     describe('setDelegateTrie', () => {
-        it('reverts if delegator is zero address', async () => {
-            const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            await expect(
-                md
-                    .connect(delegator2)
-                    .setDelegateTrie(constants.AddressZero, trieRoot)
-            ).to.be.revertedWith('MD: delegator must be non-zero')
-        })
-
         it('reverts if trie root has all zero bytes', async () => {
             const trieRoot = constants.HashZero
             await expect(
@@ -293,7 +284,7 @@ describe('MerkleDelegation', () => {
             expect(await md.getLastDelegateRoot(delegator.address)).equals(root)
             expect(
                 await md.getLastDelegateBlockNumber(delegator.address)
-            ).equals(45)
+            ).equals(43)
             expect(
                 await md.getPrevCheckpoint(delegator.address, blockNum)
             ).equals(0)
