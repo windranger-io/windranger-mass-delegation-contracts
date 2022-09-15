@@ -28,6 +28,10 @@ contract MerkleDelegation is Ownable, Pausable {
     event ClearDelegate(address indexed delegator, bytes32 trieRoot);
 
     constructor(address _governanceToken) Ownable() Pausable() {
+        require(
+            _governanceToken != address(0),
+            "MD: gov token must be non-zero"
+        );
         governanceToken = _governanceToken;
         emit OwnerInitialized(_msgSender());
     }
