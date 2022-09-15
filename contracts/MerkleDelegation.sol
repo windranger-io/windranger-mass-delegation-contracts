@@ -19,8 +19,7 @@ contract MerkleDelegation is Ownable, Pausable {
     address public governanceToken;
     mapping(address => DelegatorRecord[]) public delegation;
 
-    event OwnerInitialized(address owner);
-    event OwnerChanged(address newOwner);
+    event OwnerInitialized(address indexed owner);
     event SetDelegates(
         address indexed delegator,
         bytes32 indexed trieRoot,
@@ -34,6 +33,7 @@ contract MerkleDelegation is Ownable, Pausable {
             "MD: token addr must be non-zero"
         );
         governanceToken = _governanceToken;
+        emit OwnerInitialized(_msgSender());
     }
 
     function setDelegateTrie(address delegator, bytes32 trieRoot)
