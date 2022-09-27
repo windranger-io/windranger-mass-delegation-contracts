@@ -145,7 +145,8 @@ contract MerkleDelegation is Ownable, Pausable {
         virtual
         override
         onlyOwner
-        whenNotPaused
+        whenNotPaused // if keys are stole you can still pause it
+                      // and then unpause+transfer (in 1 tx)
     {
         _transferOwnership(newOwner);
     }
