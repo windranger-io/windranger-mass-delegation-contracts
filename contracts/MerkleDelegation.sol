@@ -17,6 +17,10 @@ contract MerkleDelegation is Ownable, Pausable {
     address public immutable governanceToken;
     mapping(address => DelegatorRecord) public delegation;
     mapping(address => address) public delegateToDelegator;
+    bytes32 public constant EMPTY_MERKLE_TRIE_ROOT =
+        bytes32(
+            0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+        );
 
     event SetDelegates(
         address indexed delegator,
@@ -40,12 +44,7 @@ contract MerkleDelegation is Ownable, Pausable {
 
     function clearDelegateTrie(address delegator) external whenNotPaused {
         require(delegator == msg.sender, "delegator must be msg.sender");
-        _setDelegateTrie(
-            delegator,
-            bytes32(
-                0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-            )
-        );
+        _setDelegateTrie(delegator, EMPTY_MERKLE_TRIE_ROOT);
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -62,14 +61,7 @@ contract MerkleDelegation is Ownable, Pausable {
         returns (bytes32 trieRoot)
     {
         require(delegator != address(0), "delegator must be non-zero");
-        if (delegation[delegator].trieRoot != bytes32(0)) {
-            return delegation[delegator].trieRoot;
-        } else {
-            return
-                bytes32(
-                    0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-                );
-        }
+        return delegation[delegator].trieRoot;
     }
 
     function getDelegateBlockNumber(address delegator)
