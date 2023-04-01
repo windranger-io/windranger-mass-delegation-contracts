@@ -35,23 +35,16 @@ contract MerkleDelegation is Ownable, Pausable {
     {
         require(delegator == msg.sender, "delegator must be msg.sender");
         require(trieRoot != bytes32(0), "trieRoot must be non-zero");
-        delegation[delegator].trieRoot = trieRoot;
-        delegation[delegator].blockNumber = block.number;
-        emit SetDelegates(delegator, trieRoot, block.number);
+        _setDelegateTrie(delegator, trieRoot);
     }
 
     function clearDelegateTrie(address delegator) external whenNotPaused {
         require(delegator == msg.sender, "delegator must be msg.sender");
-        delegation[delegator].trieRoot = bytes32(
-            0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-        );
-        delegation[delegator].blockNumber = block.number;
-        emit SetDelegates(
+        _setDelegateTrie(
             delegator,
             bytes32(
                 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
-            ),
-            block.number
+            )
         );
     }
 
@@ -96,5 +89,14 @@ contract MerkleDelegation is Ownable, Pausable {
         whenNotPaused
     {
         _transferOwnership(newOwner);
+    }
+
+    function _setDelegateTrie(address delegator, bytes32 trieRoot)
+        internal
+        whenNotPaused
+    {
+        delegation[delegator].trieRoot = trieRoot;
+        delegation[delegator].blockNumber = block.number;
+        emit SetDelegates(delegator, trieRoot, block.number);
     }
 }
