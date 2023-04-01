@@ -55,9 +55,9 @@ task('deploy', 'Deploys the MerkleDelagation Contract')
     .addParam(
         'verify',
         'Should the contract be verified with etherscan?',
-        false
+        'false'
     )
-    .setAction(async (taskArgs: {govToken: string; verify: boolean}, hre) => {
+    .setAction(async (taskArgs: {govToken: string; verify: string}, hre) => {
         // get current time
         let nowts = await now(hre.ethers)
 
@@ -68,7 +68,7 @@ task('deploy', 'Deploys the MerkleDelagation Contract')
         const merkleDelegation = await deployMerkleDelegation(
             hre,
             taskArgs.govToken,
-            taskArgs.verify
+            taskArgs.verify === 'true'
         )
 
         // done
