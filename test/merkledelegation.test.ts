@@ -135,7 +135,13 @@ describe('MerkleDelegation', () => {
                     .setDelegateTrie(delegator.address, trieRoot)
             )
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
-            expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(
+                `["${delegator.address}","${trieRoot}",${JSON.stringify(
+                    blockNumber
+                )}]`
+            )
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )
@@ -151,7 +157,13 @@ describe('MerkleDelegation', () => {
                     .setDelegateTrie(delegator.address, trieRoot)
             )
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
-            expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(
+                `["${delegator.address}","${trieRoot}",${JSON.stringify(
+                    blockNumber
+                )}]`
+            )
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )
@@ -168,7 +180,13 @@ describe('MerkleDelegation', () => {
                     .setDelegateTrie(delegator.address, trieRoot)
             )
             let blockNumber = BigNumber.from(await provider.getBlockNumber())
-            expect(await md.getDelegateRoot(delegator.address)).equals(trieRoot)
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(
+                `["${delegator.address}","${trieRoot}",${JSON.stringify(
+                    blockNumber
+                )}]`
+            )
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )

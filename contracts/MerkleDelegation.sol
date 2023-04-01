@@ -55,13 +55,21 @@ contract MerkleDelegation is Ownable, Pausable {
         _unpause();
     }
 
-    function getDelegateRoot(address delegator)
+    function getDelegate(address delegator)
         external
         view
-        returns (bytes32 trieRoot)
+        returns (
+            address delegatorAddress,
+            bytes32 trieRoot,
+            uint256 blockNumber
+        )
     {
         require(delegator != address(0), "delegator must be non-zero");
-        return delegation[delegator].trieRoot;
+        return (
+            delegator,
+            delegation[delegator].trieRoot,
+            delegation[delegator].blockNumber
+        );
     }
 
     function getDelegateBlockNumber(address delegator)
