@@ -137,11 +137,7 @@ describe('MerkleDelegation', () => {
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
-            ).equals(
-                `["${delegator.address}","${trieRoot}",${JSON.stringify(
-                    blockNumber
-                )}]`
-            )
+            ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )
@@ -159,11 +155,7 @@ describe('MerkleDelegation', () => {
             const blockNumber = BigNumber.from(await provider.getBlockNumber())
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
-            ).equals(
-                `["${delegator.address}","${trieRoot}",${JSON.stringify(
-                    blockNumber
-                )}]`
-            )
+            ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )
@@ -182,11 +174,7 @@ describe('MerkleDelegation', () => {
             let blockNumber = BigNumber.from(await provider.getBlockNumber())
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
-            ).equals(
-                `["${delegator.address}","${trieRoot}",${JSON.stringify(
-                    blockNumber
-                )}]`
-            )
+            ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
             expect(await md.getDelegateBlockNumber(delegator.address)).equals(
                 blockNumber
             )
