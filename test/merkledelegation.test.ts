@@ -138,9 +138,6 @@ describe('MerkleDelegation', () => {
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
             ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
-            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
-                blockNumber
-            )
         })
     })
 
@@ -156,9 +153,6 @@ describe('MerkleDelegation', () => {
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
             ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
-            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
-                blockNumber
-            )
             await expect(
                 md.connect(delegator).clearDelegateTrie(constants.AddressZero)
             ).to.be.revertedWith('delegator must be msg.sender')
@@ -175,15 +169,16 @@ describe('MerkleDelegation', () => {
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
             ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
-            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
-                blockNumber
-            )
             const receipt = await successfulTransaction(
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             )
             blockNumber = BigNumber.from(await provider.getBlockNumber())
-            expect(await md.getDelegateBlockNumber(delegator.address)).equals(
-                blockNumber
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(
+                `["0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",${JSON.stringify(
+                    blockNumber
+                )}]`
             )
             eventOf(md, 'SetDelegates').expectOne(receipt, {
                 delegator: delegator.address,

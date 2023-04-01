@@ -67,15 +67,6 @@ contract MerkleDelegation is Ownable, Pausable {
         );
     }
 
-    function getDelegateBlockNumber(address delegator)
-        external
-        view
-        returns (uint256 blockNumber)
-    {
-        require(delegator != address(0), "delegator must be non-zero");
-        return delegation[delegator].blockNumber;
-    }
-
     function transferOwnership(address newOwner)
         public
         virtual
