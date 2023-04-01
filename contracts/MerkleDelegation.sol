@@ -29,7 +29,10 @@ contract MerkleDelegation is Ownable, Pausable {
         governanceToken = _governanceToken;
     }
 
-    function setDelegateTrie(address delegator, bytes32 trieRoot) external whenNotPaused {
+    function setDelegateTrie(address delegator, bytes32 trieRoot)
+        external
+        whenNotPaused
+    {
         require(delegator == msg.sender, "delegator must be msg.sender");
         require(trieRoot != bytes32(0), "trieRoot must be non-zero");
         delegation[delegator].trieRoot = trieRoot;
@@ -39,8 +42,17 @@ contract MerkleDelegation is Ownable, Pausable {
 
     function clearDelegateTrie(address delegator) external whenNotPaused {
         require(delegator == msg.sender, "delegator must be msg.sender");
-        delete delegation[delegator];
-        emit SetDelegates(delegator, bytes32(0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421), block.number);
+        delegation[delegator].trieRoot = bytes32(
+            0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+        );
+        delegation[delegator].blockNumber = block.number;
+        emit SetDelegates(
+            delegator,
+            bytes32(
+                0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+            ),
+            block.number
+        );
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -51,17 +63,38 @@ contract MerkleDelegation is Ownable, Pausable {
         _unpause();
     }
 
-    function getDelegateRoot(address delegator) external view returns (bytes32 trieRoot) {
+    function getDelegateRoot(address delegator)
+        external
+        view
+        returns (bytes32 trieRoot)
+    {
         require(delegator != address(0), "delegator must be non-zero");
-        return delegation[delegator].trieRoot;
+        if (delegation[delegator].trieRoot != bytes32(0)) {
+            return delegation[delegator].trieRoot;
+        } else {
+            return
+                bytes32(
+                    0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421
+                );
+        }
     }
 
-    function getDelegateBlockNumber(address delegator) external view returns (uint256 blockNumber) {
+    function getDelegateBlockNumber(address delegator)
+        external
+        view
+        returns (uint256 blockNumber)
+    {
         require(delegator != address(0), "delegator must be non-zero");
         return delegation[delegator].blockNumber;
     }
 
-    function transferOwnership(address newOwner) public virtual override onlyOwner whenNotPaused {
+    function transferOwnership(address newOwner)
+        public
+        virtual
+        override
+        onlyOwner
+        whenNotPaused
+    {
         _transferOwnership(newOwner);
     }
 }
