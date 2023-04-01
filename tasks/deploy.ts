@@ -9,8 +9,8 @@ import {
 } from './utils/contract'
 
 // We'll deploy injected versions of these types
-import {MerkleDelegation} from '../typechain-types'
 import {HardhatRuntimeEnvironment} from 'hardhat/types'
+import {Contract} from 'ethers'
 
 // get timestamp from the chain to avoid out-of-sync errors
 const now = async (ethers: HardhatRuntimeEnvironment['ethers']) => {
@@ -25,23 +25,18 @@ async function deployMerkleDelegation(
     hre: HardhatRuntimeEnvironment,
     govToken: string,
     verify = false
-): Promise<MerkleDelegation> {
+): Promise<Contract> {
     // deploy merkle delegation contract
-    const merkleDelegation = await deployContract<MerkleDelegation>(
+    const merkleDelegation = await deployContract<Contract>(
         hre,
         'MerkleDelegation',
         govToken
     )
-    // wait 1m for bytecode to make it to etherscan
-    await awaitContractPropagation(60000)
+    // wait 30s for bytecode to make it to etherscan
+    await awaitContractPropagation(30000)
 
     // verify contract on etherscan
-    verify &&
-        (await verifyContract<MerkleDelegation>(
-            hre,
-            merkleDelegation,
-            govToken
-        ))
+    verify && (await verifyContract<Contract>(hre, merkleDelegation, govToken))
 
     // return verified contract
     return merkleDelegation

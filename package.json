@@ -14,7 +14,7 @@
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile && TS_NODE_TRANSPILE_ONLY=1 hardhat typechain",
+    "build": "hardhat compile",
     "clean": "hardhat clean",
     "format": "npm run format-ts && npm run format-sol",
     "format-sol": "prettier --ignore-unknown --write contracts",
