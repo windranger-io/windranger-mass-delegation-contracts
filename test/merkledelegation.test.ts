@@ -3,8 +3,6 @@ import 'hardhat'
 import '@nomiclabs/hardhat-ethers'
 // End - Support direct Mocha run & debug
 
-import {MerkleTree} from 'merkletreejs'
-
 import chai, {expect} from 'chai'
 import {before} from 'mocha'
 import {solidity} from 'ethereum-waffle'
@@ -13,7 +11,6 @@ import {deployContract, signer} from './framework/contracts'
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 import {successfulTransaction} from './framework/transaction'
 import {eventOf} from './framework/event-wrapper'
-import {expectEmittersAndEvents, expectEvents} from './framework/event-filters'
 import {utils, BigNumber, constants} from 'ethers'
 /* eslint-disable no-duplicate-imports */
 import {waffle} from 'hardhat'
@@ -21,6 +18,10 @@ import {waffle} from 'hardhat'
 // Wires up Waffle with Chai
 chai.use(solidity)
 const provider = waffle.provider
+
+// Expect empty merkleRoot if the delegation state is empty (if undefined expect 0x0)
+const EMPTY_MERKLE_TRIE_ROOT =
+    '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421'
 
 /*
  * The below comments are only for explaining the test layout.
@@ -176,14 +177,11 @@ describe('MerkleDelegation', () => {
             expect(
                 JSON.stringify(await md.getDelegate(delegator.address))
             ).equals(
-                `["0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",${JSON.stringify(
-                    blockNumber
-                )}]`
+                `["${EMPTY_MERKLE_TRIE_ROOT}",${JSON.stringify(blockNumber)}]`
             )
             eventOf(md, 'SetDelegates').expectOne(receipt, {
                 delegator: delegator.address,
-                trieRoot:
-                    '0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421',
+                trieRoot: EMPTY_MERKLE_TRIE_ROOT,
                 blockNumber
             })
         })
@@ -191,11 +189,8 @@ describe('MerkleDelegation', () => {
 
     describe('pause', () => {
         it('can pause setDelegateTrie', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
             await expect(
                 md
                     .connect(delegator)
@@ -205,8 +200,7 @@ describe('MerkleDelegation', () => {
 
         it('can pause clearDelegateTrie', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
-            const receipt = await successfulTransaction(
+            await successfulTransaction(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
@@ -231,61 +225,65 @@ describe('MerkleDelegation', () => {
 
     describe('unpause', () => {
         it('can unpause setDelegateTrie', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
             await expect(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
             ).to.be.revertedWith('Pausable: paused')
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
+            await successfulTransaction(md.connect(admin).unpause())
             const receipt = await successfulTransaction(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
             )
+            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(`["${trieRoot}",${JSON.stringify(blockNumber)}]`)
+            eventOf(md, 'SetDelegates').expectOne(receipt, {
+                delegator: delegator.address,
+                trieRoot,
+                blockNumber
+            })
         })
 
         it('can pause clearDelegateTrie', async () => {
             const trieRoot = utils.soliditySha256(['string'], ['some input'])
-            const blockNumber = BigNumber.from(await provider.getBlockNumber())
-            const receipt = await successfulTransaction(
+            await successfulTransaction(
                 md
                     .connect(delegator)
                     .setDelegateTrie(delegator.address, trieRoot)
             )
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             await expect(
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             ).to.be.revertedWith('Pausable: paused')
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
-            const receipt3 = await successfulTransaction(
+            await successfulTransaction(md.connect(admin).unpause())
+            const receipt = await successfulTransaction(
                 md.connect(delegator).clearDelegateTrie(delegator.address)
             )
+            const blockNumber = BigNumber.from(await provider.getBlockNumber())
+            expect(
+                JSON.stringify(await md.getDelegate(delegator.address))
+            ).equals(
+                `["${EMPTY_MERKLE_TRIE_ROOT}",${JSON.stringify(blockNumber)}]`
+            )
+            eventOf(md, 'SetDelegates').expectOne(receipt, {
+                delegator: delegator.address,
+                trieRoot: EMPTY_MERKLE_TRIE_ROOT,
+                blockNumber
+            })
         })
 
         it('can unpause pause function', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
             await expect(md.connect(admin).pause()).to.be.revertedWith(
                 'Pausable: paused'
             )
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
-            const receipt3 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
+            await successfulTransaction(md.connect(admin).unpause())
+            await successfulTransaction(md.connect(admin).pause())
         })
 
         it('cannot unpause if not paused', async () => {
@@ -295,12 +293,8 @@ describe('MerkleDelegation', () => {
         })
 
         it('cannot unpause unpause function', async () => {
-            const receipt0 = await successfulTransaction(
-                md.connect(admin).pause()
-            )
-            const receipt1 = await successfulTransaction(
-                md.connect(admin).unpause()
-            )
+            await successfulTransaction(md.connect(admin).pause())
+            await successfulTransaction(md.connect(admin).unpause())
             await expect(md.connect(admin).unpause()).to.be.revertedWith(
                 'Pausable: not paused'
             )
