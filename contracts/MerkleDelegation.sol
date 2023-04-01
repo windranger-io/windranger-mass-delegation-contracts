@@ -14,7 +14,7 @@ struct DelegatorRecord {
 // https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable
 // https://docs.openzeppelin.com/contracts/4.x/api/utils#MerkleProof
 contract MerkleDelegation is Ownable, Pausable {
-    address public governanceToken;
+    address public immutable governanceToken;
     mapping(address => DelegatorRecord) public delegation;
     mapping(address => address) public delegateToDelegator;
 
