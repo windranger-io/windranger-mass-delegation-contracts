@@ -1,9 +1,13 @@
 import {task} from 'hardhat/config'
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
+import '@nomiclabs/hardhat-etherscan'
 import '@openzeppelin/hardhat-upgrades'
 import '@nomiclabs/hardhat-waffle'
 import {log} from './config/logging'
+
+// import deploy task (export ETHERSCAN_API_KEY="..." && npx hardhat deploy --gov-token $tokenAddress --verify true)
+import './tasks/deploy'
 
 /*
  * This is a sample Hardhat task. To learn how to create your own go to https://hardhat.org/guides/create-task.html
@@ -43,6 +47,9 @@ export default {
             allowUnlimitedContractSize: false,
             loggingEnabled: true
         }
+    },
+    etherscan: {
+        apiKey: process.env.ETHERSCAN_API_KEY
     },
     solidity: {
         compilers: [
