@@ -2,6 +2,7 @@
 import {task} from 'hardhat/config'
 
 // helpers for deploying
+import {Contract} from 'ethers'
 import {
     awaitContractPropagation,
     deployContract,
@@ -10,7 +11,6 @@ import {
 
 // We'll deploy injected versions of these types
 import {HardhatRuntimeEnvironment} from 'hardhat/types'
-import {Contract} from 'ethers'
 
 // get timestamp from the chain to avoid out-of-sync errors
 const now = async (ethers: HardhatRuntimeEnvironment['ethers']) => {
@@ -70,13 +70,15 @@ task('deploy', 'Deploys the MerkleDelagation Contract')
         nowts = await now(hre.ethers)
 
         // log all the contract addresses
-        console.log(`
-        -- start: ${startts}
-        -
-        --- Gov Token: ${taskArgs.govToken}
-        -
-        --- MerkleDelegator: ${merkleDelegation.address}
-        -
-        -- fin: ${nowts}
-    `)
+        console.log(
+            `
+            -- start: ${startts}
+            -
+            --- Gov Token: ${taskArgs.govToken}
+            -
+            --- MerkleDelegator: ${merkleDelegation.address}
+            -
+            -- fin: ${nowts}
+            `.replace(/\n {12}/g, '\n')
+        )
     })
