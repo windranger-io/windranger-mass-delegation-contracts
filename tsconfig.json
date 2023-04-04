@@ -19,6 +19,11 @@
     "types": ["node", "mocha"]
   },
   "files": ["./hardhat.config.ts"],
-  "include": ["./config/**/*.ts", "./scripts/**/*.ts", "./test/**/*.ts"],
+  "include": [
+    "./config/**/*.ts",
+    "./scripts/**/*.ts",
+    "./tasks/**/*.ts",
+    "./test/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
